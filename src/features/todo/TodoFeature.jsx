@@ -1,37 +1,24 @@
 import { TextField, Button, Box, List, ListItem, ListItemText, IconButton, ListItemButton, Checkbox, Divider } from "@mui/material";
 import { useState } from "react";
 import { CheckBox, Delete as DeleteIcon } from '@mui/icons-material';
+import { useDispatch, useSelector } from "react-redux";
+import { addTodo, removeTodo, toffleCompleteTodo } from "./slices/todoSlice";
 
 const TodoFeature = () => {
-    const [todos, setTodos] = useState([]);
+    const dispatch = useDispatch();
+
+    const todos = useSelector(state => state.todos.todos);
+
     const [text, setText] = useState("");
 
-    const addTodo = () => {
-        if (!text.trim()) return;
-
-        setTodos([...todos, {
-            id: Date.now(),
-            text: text.trim(),
-            completed: false
-        }]);
-        setText('');
-    };
-
-    const removeTodo = (id) => {
-        setTodos(todos.filter(todo => todo.id !== id));
-    };
-
-    const toggleTodo = (id) => {
-        setTodos(todos.map(todo =>
-            todo.id === id
-                ? { ...todo, completed: !todo.completed }
-                : todo
-        ));
-    };
+    const addTask = () => {
+        dispatch(addTodo({ text }));
+        setText("");
+    }
 
     const onKeyPress = (e) => {
         if (e.key === "Enter") {
-            addTodo();
+            addTask();
         }
     }
 
@@ -49,7 +36,8 @@ const TodoFeature = () => {
                     fullWidth >
                 </TextField>
                 <Button
-                    onClick={addTodo}
+                    // dispatch ожидает action
+                    onClick={addTask}
                     variant="contained"
                     disabled={!text.trim()}
                 >
@@ -67,35 +55,38 @@ const TodoFeature = () => {
                         <ListItem
                             key={todo.id}
                             secondaryAction={
-                                <IconButton onClick={() => removeTodo(todo.id)}>
+                                <IconButton onClick={() => dispatch(removeTodo({ id: todo.id }))}>
                                     <DeleteIcon color="error" />
                                 </IconButton>
                             }>
                             <Checkbox
                                 checked={todo.completed}
-                                onChange={() => toggleTodo(todo.id)}
+                                onChange={() => dispatch(toffleCompleteTodo({ id: todo.id }))}
                             />
                             <ListItemText sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }} primary={todo.text} />
                         </ListItem>
-                    ))}
-                </List>
+                    ))
+                    }
+                </List >
             )}
 
-            {todos.length > 0 && (
-                <>
-                    <Divider sx={{ my: 2, borderBottomWidth: 2 }} />
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        mx: 2,
-                    }}>
-                        <span>Всего: {todos.length}</span>
-                        <span>Выполнено: {todos.filter(todo => todo.completed).length}</span>
-                    </Box>
-                </>
-            )}
+            {
+                todos.length > 0 && (
+                    <>
+                        <Divider sx={{ my: 2, borderBottomWidth: 2 }} />
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mx: 2,
+                        }}>
+                            <span>Всего: {todos.length}</span>
+                            <span>Выполнено: {todos.filter(todo => todo.completed).length}</span>
+                        </Box>
+                    </>
+                )
+            }
 
-        </Box>
+        </Box >
     );
 }
 
