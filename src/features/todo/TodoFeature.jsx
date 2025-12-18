@@ -1,6 +1,6 @@
-import { TextField, Button, Checkbox, List, ListItem, ListItemText, IconButton } from "@mui/material";
+import { TextField, Button, Box, List, ListItem, ListItemText, IconButton, ListItemButton, Checkbox, Divider } from "@mui/material";
 import { useState } from "react";
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { CheckBox, Delete as DeleteIcon } from '@mui/icons-material';
 
 const TodoFeature = () => {
     const [todos, setTodos] = useState([]);
@@ -29,63 +29,73 @@ const TodoFeature = () => {
         ));
     };
 
+    const onKeyPress = (e) => {
+        if (e.key === "Enter") {
+            addTodo();
+        }
+    }
+
     return (
-        <div>
+        <Box>
             {/* Форма */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '2px' }}>
+            <Box sx={{ display: 'flex', gap: 1, mx: 2 }}>
                 <TextField
-                    label="Новая задача"
+                    onKeyPress={onKeyPress}
+                    size="small"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    style={{ flex: 1 }}
-                />
+                    variant="outlined"
+                    label="Новая задача"
+                    fullWidth >
+                </TextField>
                 <Button
-                    variant="contained"
                     onClick={addTodo}
+                    variant="contained"
                     disabled={!text.trim()}
                 >
                     Добавить
                 </Button>
-            </div>
-
+            </Box>
             {/* Список */}
             {todos.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#666' }}>
-                    Нет задач
-                </p>
+                <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                    Задач пока нет
+                </Box>
             ) : (
                 <List>
                     {todos.map(todo => (
                         <ListItem
                             key={todo.id}
-                            style={{
-                                backgroundColor: '#f5f5f5',
-                                marginBottom: '8px',
-                                borderRadius: '4px',
-                            }}
-                        >
+                            secondaryAction={
+                                <IconButton onClick={() => removeTodo(todo.id)}>
+                                    <DeleteIcon color="error" />
+                                </IconButton>
+                            }>
                             <Checkbox
                                 checked={todo.completed}
                                 onChange={() => toggleTodo(todo.id)}
                             />
-                            <ListItemText
-                                primary={todo.text}
-                                style={{
-                                    textDecoration: todo.completed ? 'line-through' : 'none',
-                                }}
-                            />
-                            <IconButton
-                                edge="end"
-                                onClick={() => removeTodo(todo.id)}
-                                color="error"
-                            >
-                                <DeleteIcon />
-                            </IconButton>
+                            <ListItemText sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }} primary={todo.text} />
                         </ListItem>
                     ))}
                 </List>
             )}
-        </div>
+
+            {todos.length > 0 && (
+                <>
+                    <Divider sx={{ my: 2, borderBottomWidth: 2 }} />
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        mx: 2,
+                    }}>
+                        <span>Всего: {todos.length}</span>
+                        <span>Выполнено: {todos.filter(todo => todo.completed).length}</span>
+                    </Box>
+                </>
+            )}
+
+        </Box>
     );
 }
 
